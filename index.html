@@ -163,6 +163,43 @@
       transform: translateY(-2px);
     }
 
+    /* Tabs */
+    .tabs-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Montserrat', sans-serif;
+      backdrop-filter: blur(8px);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-green);
+      color: white;
+      border-color: var(--accent-green);
+      box-shadow: 0 4px 12px rgba(15, 110, 63, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Calculator grid */
     .calculator-grid {
       display: grid;
       grid-template-columns: 1.2fr 1.8fr;
@@ -262,6 +299,7 @@
       box-shadow: 0 4px 8px rgba(15, 110, 63, 0.3);
     }
 
+    /* Results */
     .results-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -295,6 +333,22 @@
       font-family: 'Montserrat', sans-serif;
       color: var(--text-primary);
       line-height: 1.2;
+    }
+
+    .result-highlight {
+      background: rgba(15, 110, 63, 0.08);
+      border: 2px solid var(--accent-green);
+      padding: 24px;
+      border-radius: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .result-highlight .big-number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--accent-green);
     }
 
     canvas {
@@ -334,7 +388,7 @@
 
     .offer-logo {
       margin-bottom: 20px;
-      height: 90px;
+      height: 70px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -342,7 +396,7 @@
 
     .offer-logo img {
       max-height: 100%;
-      max-width: 180px;
+      max-width: 220px;
       object-fit: contain;
     }
 
@@ -404,13 +458,23 @@
       opacity: 0.8;
     }
 
-    /* Мелкие правки мобильного UX */
     @media (max-width: 480px) {
       .btn-cta { padding: 10px 16px; font-size: 0.9rem; }
       .offer-btn { padding: 10px 16px; }
       .glass-card { padding: 20px 16px !important; }
       .stat-value { font-size: 1.7rem; }
       .logo { font-size: 1.6rem; }
+      .result-highlight .big-number { font-size: 2rem; }
+    }
+
+    .goal-mode-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .goal-mode-row .toggle-option {
+      flex: 1;
     }
   </style>
 </head>
@@ -431,134 +495,230 @@
     </div>
   </header>
 
-  <!-- Calculator area -->
-  <div class="calculator-grid">
-    <div class="glass-card" style="padding: 28px 22px;">
-      <div class="input-group">
-        <div class="input-label"><i class="fas fa-ruble-sign"></i> Сумма для старта</div>
-        <div class="input-field">
-          <i class="fas fa-wallet"></i>
-          <input type="number" id="initialCapital" value="100000" min="0" step="1000">
-          <span class="suffix">₽</span>
-        </div>
-      </div>
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button class="tab-btn active" data-tab="tab-accumulate">📈 Накопить сумму</button>
+    <button class="tab-btn" data-tab="tab-goal">🎯 Достичь цели</button>
+  </div>
 
-      <div class="input-group">
-        <div class="input-label"><i class="fas fa-calendar-plus"></i> Ежемесячное пополнение</div>
-        <div class="input-field">
-          <i class="fas fa-plus-circle"></i>
-          <input type="number" id="monthlyDeposit" value="10000" min="0" step="500">
-          <span class="suffix">₽</span>
-        </div>
-      </div>
-
-      <div class="input-group">
-        <div class="input-label"><i class="fas fa-hourglass-half"></i> Срок</div>
-        <div class="toggle-switch" id="termToggle">
-          <div class="toggle-option active" data-unit="years">Лет</div>
-          <div class="toggle-option" data-unit="months">Месяцев</div>
-        </div>
-        <div class="input-field" style="margin-top: 12px;">
-          <i class="fas fa-clock"></i>
-          <input type="number" id="termValue" value="5" min="0.5" step="0.5">
-          <span class="suffix" id="termUnitLabel">лет</span>
-        </div>
-      </div>
-
-      <div class="flex-row" style="display: flex; gap: 16px;">
-        <div class="input-group" style="flex:1;">
-          <div class="input-label"><i class="fas fa-percent"></i> Ставка (% год)</div>
+  <!-- ==================== TAB 1: НАКОПИТЬ СУММУ ==================== -->
+  <div class="tab-content active" id="tab-accumulate">
+    <div class="calculator-grid">
+      <div class="glass-card" style="padding: 28px 22px;">
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-ruble-sign"></i> Сумма для старта</div>
           <div class="input-field">
-            <i class="fas fa-bank"></i>
-            <input type="number" id="interestRate" value="12.0" min="0.1" step="0.1">
-            <span class="suffix">%</span>
+            <i class="fas fa-wallet"></i>
+            <input type="number" id="initialCapital" value="100000" min="0" step="1000">
+            <span class="suffix">₽</span>
           </div>
         </div>
-        <div class="input-group" style="flex:1;">
-          <div class="input-label"><i class="fas fa-cog"></i> Тип процента</div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-calendar-plus"></i> Ежемесячное пополнение</div>
           <div class="input-field">
-            <i class="fas fa-percent"></i>
-            <select id="interestType">
-              <option value="compound" selected>Сложный</option>
-              <option value="simple">Простой</option>
+            <i class="fas fa-plus-circle"></i>
+            <input type="number" id="monthlyDeposit" value="10000" min="0" step="500">
+            <span class="suffix">₽</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-hourglass-half"></i> Срок</div>
+          <div class="toggle-switch" id="termToggle">
+            <div class="toggle-option active" data-unit="years">Лет</div>
+            <div class="toggle-option" data-unit="months">Месяцев</div>
+          </div>
+          <div class="input-field" style="margin-top: 12px;">
+            <i class="fas fa-clock"></i>
+            <input type="number" id="termValue" value="5" min="0.5" step="0.5">
+            <span class="suffix" id="termUnitLabel">лет</span>
+          </div>
+        </div>
+
+        <div class="flex-row" style="display: flex; gap: 16px;">
+          <div class="input-group" style="flex:1;">
+            <div class="input-label"><i class="fas fa-percent"></i> Ставка (% год)</div>
+            <div class="input-field">
+              <i class="fas fa-bank"></i>
+              <input type="number" id="interestRate" value="12.0" min="0.1" step="0.1">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+          <div class="input-group" style="flex:1;">
+            <div class="input-label"><i class="fas fa-cog"></i> Тип процента</div>
+            <div class="input-field">
+              <i class="fas fa-percent"></i>
+              <select id="interestType">
+                <option value="compound" selected>Сложный</option>
+                <option value="simple">Простой</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-clock"></i> Период капитализации</div>
+          <div class="input-field">
+            <i class="fas fa-sync-alt"></i>
+            <select id="compoundingFreq">
+              <option value="monthly" selected>Ежемесячно</option>
+              <option value="quarterly">Ежеквартально</option>
+              <option value="annually">Ежегодно</option>
             </select>
           </div>
         </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-scale-balanced"></i> Инфляция (% в год)</div>
+          <div class="input-field">
+            <i class="fas fa-trend-down"></i>
+            <input type="number" id="inflationRate" value="4.0" min="0" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="cbr-link">
+          <a href="https://cbr.ru/" target="_blank"><i class="fas fa-external-link-alt"></i> Официальные данные ЦБ РФ</a>
+        </div>
       </div>
 
-      <div class="input-group">
-        <div class="input-label"><i class="fas fa-clock"></i> Период капитализации</div>
-        <div class="input-field">
-          <i class="fas fa-sync-alt"></i>
-          <select id="compoundingFreq">
-            <option value="monthly" selected>Ежемесячно</option>
-            <option value="quarterly">Ежеквартально</option>
-            <option value="annually">Ежегодно</option>
-          </select>
+      <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 1.3rem;"><i class="fas fa-chart-scatter" style="color: var(--accent-green);"></i> Динамика капитала</h3>
+          <span class="small-note"><i class="far fa-calendar-alt"></i> по годам</span>
         </div>
-      </div>
-
-      <div class="input-group">
-        <div class="input-label">
-          <i class="fas fa-scale-balanced"></i> Инфляция (% в год)
+        <div style="min-height: 220px;">
+          <canvas id="investmentChart"></canvas>
         </div>
-        <div class="input-field">
-          <i class="fas fa-trend-down"></i>
-          <input type="number" id="inflationRate" value="4.0" min="0" step="0.1">
-          <span class="suffix">%</span>
-        </div>
-      </div>
-      <div class="cbr-link">
-        <a href="https://cbr.ru/" target="_blank"><i class="fas fa-external-link-alt"></i> Официальные данные ЦБ РФ</a>
+        <p style="color: var(--text-secondary); margin-top: 12px; font-size: 0.8rem;">
+          <i class="fas fa-circle" style="color: #3b82f6;"></i> Внесено ·
+          <i class="fas fa-circle" style="color: #10b981;"></i> Номинал ·
+          <i class="fas fa-circle" style="color: #f97316;"></i> Реальная стоимость
+        </p>
       </div>
     </div>
 
-    <!-- Right: chart -->
-    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; justify-content: center;">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-        <h3 style="font-size: 1.3rem;"><i class="fas fa-chart-scatter" style="color: var(--accent-green);"></i> Динамика капитала</h3>
-        <span class="small-note"><i class="far fa-calendar-alt"></i> по годам</span>
+    <div class="results-row">
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-coins"></i> Итоговый капитал</div>
+        <div class="stat-value" id="nominalCapital">0 ₽</div>
       </div>
-      <div style="min-height: 220px;">
-        <canvas id="investmentChart"></canvas>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-chart-line"></i> Заработано на %</div>
+        <div class="stat-value" id="totalInterest">0 ₽</div>
       </div>
-      <p style="color: var(--text-secondary); margin-top: 12px; font-size: 0.8rem;">
-        <i class="fas fa-circle" style="color: #3b82f6;"></i> Внесено · 
-        <i class="fas fa-circle" style="color: #10b981;"></i> Номинал · 
-        <i class="fas fa-circle" style="color: #f97316;"></i> Реальная стоимость
-      </p>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-piggy-bank"></i> Сумма пополнений</div>
+        <div class="stat-value" id="totalContributions">0 ₽</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-shield"></i> Реальный капитал</div>
+        <div class="stat-value" id="realCapital">0 ₽</div>
+      </div>
     </div>
   </div>
 
-  <!-- Results cards -->
-  <div class="results-row">
-    <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-coins"></i> Итоговый капитал</div>
-      <div class="stat-value" id="nominalCapital">0 ₽</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-chart-line"></i> Заработано на %</div>
-      <div class="stat-value" id="totalInterest">0 ₽</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-piggy-bank"></i> Сумма пополнений</div>
-      <div class="stat-value" id="totalContributions">0 ₽</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label"><i class="fas fa-shield"></i> Реальный капитал</div>
-      <div class="stat-value" id="realCapital">0 ₽</div>
+  <!-- ==================== TAB 2: ДОСТИЧЬ ЦЕЛИ ==================== -->
+  <div class="tab-content" id="tab-goal">
+    <div class="calculator-grid">
+      <div class="glass-card" style="padding: 28px 22px;">
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-bullseye"></i> Нужная сумма</div>
+          <div class="input-field">
+            <i class="fas fa-flag"></i>
+            <input type="number" id="goalAmount" value="1000000" min="1" step="50000">
+            <span class="suffix">₽</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-ruble-sign"></i> Стартовый капитал</div>
+          <div class="input-field">
+            <i class="fas fa-wallet"></i>
+            <input type="number" id="goalInitial" value="100000" min="0" step="1000">
+            <span class="suffix">₽</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-percent"></i> Ставка (% годовых)</div>
+          <div class="input-field">
+            <i class="fas fa-bank"></i>
+            <input type="number" id="goalInterest" value="12.0" min="0.1" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-scale-balanced"></i> Учитывать инфляцию</div>
+          <div class="toggle-switch" id="goalInflationToggle">
+            <div class="toggle-option active" data-inflation="no">Нет</div>
+            <div class="toggle-option" data-inflation="yes">Да</div>
+          </div>
+          <div class="input-field" style="margin-top: 12px;" id="goalInflationField" hidden>
+            <i class="fas fa-trend-down"></i>
+            <input type="number" id="goalInflationRate" value="4.0" min="0" step="0.1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label"><i class="fas fa-cog"></i> Режим расчёта</div>
+          <div class="toggle-switch" id="goalModeToggle">
+            <div class="toggle-option active" data-mode="find-time">Узнать срок</div>
+            <div class="toggle-option" data-mode="find-payment">Узнать платёж</div>
+          </div>
+        </div>
+
+        <!-- Поле для срока (режим "узнать платёж") -->
+        <div class="input-group" id="goalTermGroup">
+          <div class="input-label"><i class="fas fa-hourglass-half"></i> Срок накопления</div>
+          <div class="input-field">
+            <i class="fas fa-clock"></i>
+            <input type="number" id="goalTermYears" value="5" min="0.5" step="0.5">
+            <span class="suffix">лет</span>
+          </div>
+        </div>
+
+        <!-- Поле для платежа (режим "узнать срок") -->
+        <div class="input-group" id="goalPaymentGroup" style="display: none;">
+          <div class="input-label"><i class="fas fa-calendar-plus"></i> Ежемесячный платёж</div>
+          <div class="input-field">
+            <i class="fas fa-plus-circle"></i>
+            <input type="number" id="goalMonthlyPayment" value="15000" min="0" step="500">
+            <span class="suffix">₽</span>
+          </div>
+        </div>
+
+        <div class="cbr-link">
+          <a href="https://cbr.ru/" target="_blank"><i class="fas fa-external-link-alt"></i> Официальные данные ЦБ РФ</a>
+        </div>
+      </div>
+
+      <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: center;">
+        <h3 style="font-size: 1.3rem; margin-bottom: 20px;"><i class="fas fa-trophy" style="color: var(--accent-green);"></i> Результат</h3>
+        <div class="result-highlight" id="goalResultBox">
+          <p style="font-size: 1rem; color: var(--text-secondary);">Введите данные для расчёта</p>
+        </div>
+        <div style="min-height: 220px; margin-top: 20px;">
+          <canvas id="goalChart"></canvas>
+        </div>
+        <p style="color: var(--text-secondary); margin-top: 12px; font-size: 0.8rem;">
+          <i class="fas fa-circle" style="color: #3b82f6;"></i> Внесено ·
+          <i class="fas fa-circle" style="color: #10b981;"></i> Накоплено ·
+          <i class="fas fa-circle" style="color: #ef4444;"></i> Цель
+        </p>
+      </div>
     </div>
   </div>
 
-  <!-- Bank offers (Т-Банк с логотипом) -->
+  <!-- Bank offers -->
   <div id="offersSection" style="margin-top: 30px; scroll-margin-top: 20px;">
     <h3 style="margin-bottom: 20px; font-size: 1.7rem; text-align: center;"><i class="fas fa-gem" style="color: var(--accent-green);"></i> Откройте счёт в Т-Банке</h3>
     <div class="offers-grid">
       <div class="offer-card">
-        <!-- Место для логотипа: используем img. Название alt задаёт описание -->
         <div class="offer-logo">
-          <img src="images/tbank-logo.png" alt="Логотип Т-Банк" style="max-width: 180px; height: auto;">
-          <!-- Если логотип PNG/JPG, измените путь на images/tbank-logo.png -->
+          <img src="images/tbank-logo.svg" alt="Логотип Т-Банк" style="max-width: 220px; height: auto;">
         </div>
         <div class="offer-buttons">
           <a href="https://tbank.ru/baf/Lwp4musr1U" target="_blank" class="offer-btn">
@@ -570,9 +730,7 @@
             <span class="bonus-badge">+0,25% к ставке</span>
           </a>
         </div>
-        <div class="ad-disclaimer">
-          Реклама. АО «Т-Банк»
-        </div>
+        <div class="ad-disclaimer">Реклама. АО «Т-Банк»</div>
       </div>
     </div>
   </div>
@@ -586,13 +744,13 @@
   (function(){
     "use strict";
 
-    // Theme toggle
+    // ============ THEME ============
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
     const icon = themeToggle.querySelector('i');
-    
-    let chart;
-    const ctx = document.getElementById('investmentChart').getContext('2d');
+    let chartAccumulate, chartGoal;
+    const ctxAccumulate = document.getElementById('investmentChart').getContext('2d');
+    const ctxGoal = document.getElementById('goalChart').getContext('2d');
 
     function getChartColors() {
       const styles = getComputedStyle(body);
@@ -602,14 +760,16 @@
       };
     }
 
-    function applyThemeToChart() {
-      if (!chart) return;
+    function applyThemeToCharts() {
       const colors = getChartColors();
-      chart.options.scales.x.grid.color = colors.gridColor;
-      chart.options.scales.y.grid.color = colors.gridColor;
-      chart.options.scales.x.ticks.color = colors.textColor;
-      chart.options.scales.y.ticks.color = colors.textColor;
-      chart.update();
+      [chartAccumulate, chartGoal].forEach(chart => {
+        if (!chart) return;
+        chart.options.scales.x.grid.color = colors.gridColor;
+        chart.options.scales.y.grid.color = colors.gridColor;
+        chart.options.scales.x.ticks.color = colors.textColor;
+        chart.options.scales.y.ticks.color = colors.textColor;
+        chart.update();
+      });
     }
 
     function setTheme(isDark) {
@@ -620,25 +780,45 @@
         body.classList.remove('dark-theme');
         icon.className = 'fas fa-moon';
       }
-      applyThemeToChart();
+      applyThemeToCharts();
     }
-    
-    themeToggle.addEventListener('click', () => {
-      setTheme(!body.classList.contains('dark-theme'));
+
+    themeToggle.addEventListener('click', () => setTheme(!body.classList.contains('dark-theme')));
+
+    // ============ TABS ============
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById(this.dataset.tab).classList.add('active');
+        // Перерисовать чарты после смены вкладки
+        setTimeout(() => {
+          if (this.dataset.tab === 'tab-accumulate' && chartAccumulate) chartAccumulate.update();
+          if (this.dataset.tab === 'tab-goal' && chartGoal) chartGoal.update();
+        }, 100);
+      });
     });
 
     document.getElementById('scrollToOffers').addEventListener('click', () => {
       document.getElementById('offersSection').scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Calculator elements
+    // ============ UTILS ============
+    function formatRub(value) {
+      return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(value)) + ' ₽';
+    }
+
+    // ============ TAB 1: НАКОПИТЬ СУММУ ============
     const initialCap = document.getElementById('initialCapital');
     const monthlyDep = document.getElementById('monthlyDeposit');
     const termInput = document.getElementById('termValue');
     const interestInput = document.getElementById('interestRate');
     const inflationInput = document.getElementById('inflationRate');
     const termUnitLabel = document.getElementById('termUnitLabel');
-    const toggleOptions = document.querySelectorAll('.toggle-option');
+    const termToggleOptions = document.querySelectorAll('#termToggle .toggle-option');
     const interestType = document.getElementById('interestType');
     const compoundingFreq = document.getElementById('compoundingFreq');
 
@@ -649,22 +829,18 @@
 
     let termUnit = 'years';
 
-    function formatRub(value) {
-      return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Math.round(value)) + ' ₽';
-    }
-
     [initialCap, monthlyDep, termInput, interestInput, inflationInput].forEach(input => {
       input.addEventListener('input', function() { if (this.value < 0) this.value = 0; });
     });
 
-    toggleOptions.forEach(opt => {
+    termToggleOptions.forEach(opt => {
       opt.addEventListener('click', function() {
-        toggleOptions.forEach(o => o.classList.remove('active'));
+        termToggleOptions.forEach(o => o.classList.remove('active'));
         this.classList.add('active');
         termUnit = this.dataset.unit;
         termUnitLabel.textContent = termUnit === 'years' ? 'лет' : 'мес.';
         termInput.step = termUnit === 'years' ? '0.5' : '1';
-        calculateAndUpdate();
+        calculateAccumulate();
       });
     });
 
@@ -674,7 +850,7 @@
       return termUnit === 'years' ? val : val / 12;
     }
 
-    function compute() {
+    function computeAccumulate() {
       const P = parseFloat(initialCap.value) || 0;
       const M = parseFloat(monthlyDep.value) || 0;
       const rYear = parseFloat(interestInput.value) || 0;
@@ -720,7 +896,7 @@
       return { nominal: nominalBalance, totalInterest: totalInterestEarned, totalContrib, real: realBalance };
     }
 
-    function generateChartData() {
+    function generateAccumulateChartData() {
       const P = parseFloat(initialCap.value) || 0;
       const M = parseFloat(monthlyDep.value) || 0;
       const rYear = parseFloat(interestInput.value) || 0;
@@ -730,7 +906,7 @@
       const isCompound = interestType.value === 'compound';
       let periodsPerYear = freq === 'monthly' ? 12 : (freq === 'quarterly' ? 4 : 1);
       const ratePerPeriod = rYear / 100 / periodsPerYear;
-      
+
       const labels = [], contributed = [], nominal = [], real = [];
       const step = Math.max(0.5, years / 20);
       for (let y = 0; y <= years; y += step) {
@@ -759,30 +935,30 @@
       return { labels, contributed, nominal, real };
     }
 
-    function updateUI() {
-      const res = compute();
+    function updateAccumulateUI() {
+      const res = computeAccumulate();
       nominalSpan.textContent = formatRub(res.nominal);
       interestSpan.textContent = formatRub(res.totalInterest);
       contribSpan.textContent = formatRub(res.totalContrib);
       realSpan.textContent = formatRub(res.real);
-      updateChart();
+      updateAccumulateChart();
     }
 
-    function updateChart() {
-      const data = generateChartData();
+    function updateAccumulateChart() {
+      const data = generateAccumulateChartData();
       const colors = getChartColors();
-      if (chart) {
-        chart.data.labels = data.labels;
-        chart.data.datasets[0].data = data.contributed;
-        chart.data.datasets[1].data = data.nominal;
-        chart.data.datasets[2].data = data.real;
-        chart.options.scales.x.grid.color = colors.gridColor;
-        chart.options.scales.y.grid.color = colors.gridColor;
-        chart.options.scales.x.ticks.color = colors.textColor;
-        chart.options.scales.y.ticks.color = colors.textColor;
-        chart.update();
+      if (chartAccumulate) {
+        chartAccumulate.data.labels = data.labels;
+        chartAccumulate.data.datasets[0].data = data.contributed;
+        chartAccumulate.data.datasets[1].data = data.nominal;
+        chartAccumulate.data.datasets[2].data = data.real;
+        chartAccumulate.options.scales.x.grid.color = colors.gridColor;
+        chartAccumulate.options.scales.y.grid.color = colors.gridColor;
+        chartAccumulate.options.scales.x.ticks.color = colors.textColor;
+        chartAccumulate.options.scales.y.ticks.color = colors.textColor;
+        chartAccumulate.update();
       } else {
-        chart = new Chart(ctx, {
+        chartAccumulate = new Chart(ctxAccumulate, {
           type: 'line',
           data: {
             labels: data.labels,
@@ -804,13 +980,247 @@
       }
     }
 
-    function calculateAndUpdate() { updateUI(); }
+    function calculateAccumulate() { updateAccumulateUI(); }
 
-    [initialCap, monthlyDep, termInput, interestInput, inflationInput, interestType, compoundingFreq].forEach(el => el.addEventListener('input', calculateAndUpdate));
-    [interestType, compoundingFreq].forEach(el => el.addEventListener('change', calculateAndUpdate));
+    [initialCap, monthlyDep, termInput, interestInput, inflationInput, interestType, compoundingFreq].forEach(el => el.addEventListener('input', calculateAccumulate));
+    [interestType, compoundingFreq].forEach(el => el.addEventListener('change', calculateAccumulate));
 
-    calculateAndUpdate();
-    window.addEventListener('resize', () => { if(chart) chart.update(); });
+    // ============ TAB 2: ДОСТИЧЬ ЦЕЛИ ============
+    const goalAmount = document.getElementById('goalAmount');
+    const goalInitial = document.getElementById('goalInitial');
+    const goalInterest = document.getElementById('goalInterest');
+    const goalInflationToggle = document.getElementById('goalInflationToggle');
+    const goalInflationField = document.getElementById('goalInflationField');
+    const goalInflationRate = document.getElementById('goalInflationRate');
+    const goalModeToggle = document.getElementById('goalModeToggle');
+    const goalTermGroup = document.getElementById('goalTermGroup');
+    const goalPaymentGroup = document.getElementById('goalPaymentGroup');
+    const goalTermYears = document.getElementById('goalTermYears');
+    const goalMonthlyPayment = document.getElementById('goalMonthlyPayment');
+    const goalResultBox = document.getElementById('goalResultBox');
+
+    let goalInflationEnabled = false;
+    let goalMode = 'find-time'; // find-time или find-payment
+
+    // Toggle inflation
+    goalInflationToggle.querySelectorAll('.toggle-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        goalInflationToggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        goalInflationEnabled = this.dataset.inflation === 'yes';
+        goalInflationField.hidden = !goalInflationEnabled;
+        calculateGoal();
+      });
+    });
+
+    // Toggle mode
+    goalModeToggle.querySelectorAll('.toggle-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        goalModeToggle.querySelectorAll('.toggle-option').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        goalMode = this.dataset.mode;
+        if (goalMode === 'find-time') {
+          goalTermGroup.style.display = 'none';
+          goalPaymentGroup.style.display = 'block';
+        } else {
+          goalTermGroup.style.display = 'block';
+          goalPaymentGroup.style.display = 'none';
+        }
+        calculateGoal();
+      });
+    });
+
+    function computeGoal() {
+      const target = parseFloat(goalAmount.value) || 1000000;
+      const P = parseFloat(goalInitial.value) || 0;
+      const rYear = parseFloat(goalInterest.value) || 12;
+      const inf = goalInflationEnabled ? (parseFloat(goalInflationRate.value) || 0) : 0;
+      const monthlyRate = rYear / 100 / 12;
+      const inflationMonthly = Math.pow(1 + inf/100, 1/12) - 1;
+
+      // Корректировка цели с учётом инфляции (если включена)
+      // Если инфляция включена, цель — это реальная сумма, которую мы дисконтируем
+      // Для простоты будем считать, что нужная сумма — номинальная. Если инфляция включена,
+      // мы дисконтируем её обратно? Уточним: пользователь хочет "1 000 000 сегодняшних денег".
+      // Значит через N лет ему нужно target * (1+inf)^N. Учтём при итерациях.
+
+      let resultText = '';
+      let found = false;
+      const MAX_YEARS = 60;
+      const MAX_MONTHS = MAX_YEARS * 12;
+
+      if (goalMode === 'find-time') {
+        // Известен платёж, ищем срок
+        const M = parseFloat(goalMonthlyPayment.value) || 15000;
+        if (M <= 0) {
+          resultText = 'Укажите положительный платёж';
+        } else {
+          let balance = P;
+          let month = 0;
+          for (month = 0; month < MAX_MONTHS; month++) {
+            if (month > 0) balance += M;
+            balance *= (1 + monthlyRate);
+            const targetWithInflation = inf > 0 ? target * Math.pow(1 + inf/100, (month+1)/12) : target;
+            if (balance >= targetWithInflation) {
+              found = true;
+              break;
+            }
+          }
+          if (found) {
+            const years = (month+1) / 12;
+            const totalContrib = P + M * month;
+            resultText = `
+              <p>Цель будет достигнута через</p>
+              <div class="big-number">${years.toFixed(1)} лет</div>
+              <p style="margin-top: 8px;">≈ ${Math.round(years*12)} месяцев</p>
+              <p style="font-size: 0.9rem; margin-top: 12px;">Общая сумма пополнений: ${formatRub(totalContrib)}<br>Итоговый капитал: ${formatRub(balance)}</p>
+            `;
+          } else {
+            resultText = '<p>За 60 лет цель не достигнута. Увеличьте платёж или ставку.</p>';
+          }
+        }
+      } else {
+        // find-payment: известен срок, ищем платёж
+        const years = parseFloat(goalTermYears.value) || 5;
+        const totalMonths = Math.floor(years * 12);
+        if (totalMonths <= 0) {
+          resultText = 'Укажите корректный срок';
+        } else {
+          const targetWithInflation = inf > 0 ? target * Math.pow(1 + inf/100, years) : target;
+          // Решаем уравнение: P*(1+r)^N + M * [(1+r)^N - 1] / r = target
+          // где r = monthlyRate, N = totalMonths
+          const r = monthlyRate;
+          const N = totalMonths;
+          const growth = Math.pow(1 + r, N);
+          let M;
+          if (r === 0) {
+            M = (targetWithInflation - P) / N;
+          } else {
+            M = (targetWithInflation - P * growth) * r / (growth - 1);
+          }
+          if (M <= 0) {
+            resultText = '<p>Стартового капитала уже достаточно или срок слишком мал.</p>';
+          } else {
+            const balance = P * growth + M * (growth - 1) / r;
+            const totalContrib = P + M * N;
+            resultText = `
+              <p>Необходимый ежемесячный платёж</p>
+              <div class="big-number">${formatRub(M)}</div>
+              <p style="margin-top: 8px;">в течение ${years} лет</p>
+              <p style="font-size: 0.9rem; margin-top: 12px;">Общая сумма пополнений: ${formatRub(totalContrib)}<br>Итоговый капитал: ${formatRub(balance)}</p>
+            `;
+          }
+        }
+      }
+      goalResultBox.innerHTML = resultText;
+      return { found, mode: goalMode };
+    }
+
+    function generateGoalChartData() {
+      const target = parseFloat(goalAmount.value) || 1000000;
+      const P = parseFloat(goalInitial.value) || 0;
+      const rYear = parseFloat(goalInterest.value) || 12;
+      const inf = goalInflationEnabled ? (parseFloat(goalInflationRate.value) || 0) : 0;
+      const monthlyRate = rYear / 100 / 12;
+
+      let M = 0;
+      let yearsToShow = 10;
+      if (goalMode === 'find-time') {
+        M = parseFloat(goalMonthlyPayment.value) || 15000;
+        yearsToShow = Math.max(10, getTermInYearsForGoal() * 1.5 || 10);
+      } else {
+        const years = parseFloat(goalTermYears.value) || 5;
+        yearsToShow = Math.max(years * 1.5, 5);
+        const totalMonths = Math.floor(years * 12);
+        const r = monthlyRate;
+        const N = totalMonths;
+        const growth = Math.pow(1 + r, N);
+        if (r === 0) {
+          M = (target - P) / N;
+        } else {
+          M = (target - P * growth) * r / (growth - 1);
+        }
+        if (M <= 0) M = 0;
+      }
+
+      const labels = [], contributed = [], balanceArr = [], targetLine = [];
+      const step = Math.max(0.5, yearsToShow / 20);
+      const totalMonthsSim = Math.floor(yearsToShow * 12);
+      let bal = P, contrib = P;
+      for (let y = 0; y <= yearsToShow; y += step) {
+        const months = Math.floor(y * 12);
+        // пересчитать с нуля для точности
+        let simBal = P, simContrib = P;
+        for (let m = 0; m < months; m++) {
+          if (m > 0) { simBal += M; simContrib += M; }
+          simBal *= (1 + monthlyRate);
+        }
+        labels.push(y.toFixed(1) + ' г');
+        contributed.push(simContrib);
+        balanceArr.push(simBal);
+        const targetWithInf = inf > 0 ? target * Math.pow(1 + inf/100, y) : target;
+        targetLine.push(targetWithInf);
+      }
+      return { labels, contributed, balanceArr, targetLine };
+    }
+
+    function getTermInYearsForGoal() {
+      // Примерная оценка для отображения графика
+      return 10;
+    }
+
+    function updateGoalChart() {
+      const data = generateGoalChartData();
+      const colors = getChartColors();
+      if (chartGoal) {
+        chartGoal.data.labels = data.labels;
+        chartGoal.data.datasets[0].data = data.contributed;
+        chartGoal.data.datasets[1].data = data.balanceArr;
+        chartGoal.data.datasets[2].data = data.targetLine;
+        chartGoal.options.scales.x.grid.color = colors.gridColor;
+        chartGoal.options.scales.y.grid.color = colors.gridColor;
+        chartGoal.options.scales.x.ticks.color = colors.textColor;
+        chartGoal.options.scales.y.ticks.color = colors.textColor;
+        chartGoal.update();
+      } else {
+        chartGoal = new Chart(ctxGoal, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [
+              { label: 'Внесено', data: data.contributed, borderColor: '#3b82f6', borderWidth: 3, tension: 0.3, pointRadius: 2 },
+              { label: 'Накоплено', data: data.balanceArr, borderColor: '#10b981', borderWidth: 3, tension: 0.3 },
+              { label: 'Цель', data: data.targetLine, borderColor: '#ef4444', borderWidth: 2, borderDash: [5,3], tension: 0.3, pointRadius: 0 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatRub(ctx.raw)}` } } },
+            scales: {
+              x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+              y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor, callback: (val) => formatRub(val).replace('₽','') } }
+            }
+          }
+        });
+      }
+    }
+
+    function calculateGoal() {
+      computeGoal();
+      updateGoalChart();
+    }
+
+    [goalAmount, goalInitial, goalInterest, goalInflationRate, goalTermYears, goalMonthlyPayment].forEach(el => {
+      el.addEventListener('input', calculateGoal);
+    });
+
+    // ============ INIT ============
+    calculateAccumulate();
+    calculateGoal();
+    window.addEventListener('resize', () => {
+      if (chartAccumulate) chartAccumulate.update();
+      if (chartGoal) chartGoal.update();
+    });
   })();
 </script>
 </body>
